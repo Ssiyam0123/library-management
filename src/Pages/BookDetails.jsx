@@ -1,12 +1,18 @@
 import axios from "axios";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useParams, Link } from "react-router-dom";
+import AuthProvider, { AuthContext } from "../provider/AuthProvider";
+import { toast } from "react-toastify";
 
 const BookDetails = () => {
   const { id } = useParams(); // Get the book ID from the URL
   const [book, setBook] = useState(null);
-  const [loading, setLoading] = useState(true); // For loading state
-  const [error, setError] = useState(null); // For error handling
+  const {user} = useContext(AuthContext);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [showModal, setShowModal] = useState(false); // State to toggle modal
+  const [returnDate, setReturnDate] = useState(""); // Return date state
+
 
   useEffect(() => {
     const fetchBookData = async () => {
@@ -22,7 +28,28 @@ const BookDetails = () => {
     };
 
     fetchBookData();
-  }, [id]); // Dependency on `id` ensures this runs whenever `id` changes
+  }, [id]);
+
+  const handleBorrow = async (e) => {
+    e.preventDefault();
+
+    const borrowData = {
+      bookId: book._id,
+      bookTitle: book.title,
+      userName: user.displayName,
+      userEmail: user.email,
+      returnDate,
+    };
+
+    try {
+      await axios.post("http://localhost:5000/borrow", borrowData);
+      toast.success("Book borrowed successfully!");
+      setShowModal(false); // Close the modal
+    } catch (err) {
+      console.error("Error borrowing the book:", err);
+      toast.error("Failed to borrow the book. Please try again.");
+    }
+  };
 
   if (loading) {
     return (
@@ -77,7 +104,7 @@ const BookDetails = () => {
         {/* Book Details */}
         <div className="md:w-2/3 md:ml-8 mt-6 md:mt-0">
           <h2 className="text-3xl font-bold text-blue-600">{book.title}</h2>
-          <p className="text-xl text-gray-700">{book.authorName}</p>
+          <p className="text-xl text-gray-700">Author: {book.authorName}</p>
           <p className="mt-4 text-gray-600">{book.description}</p>
 
           <div className="mt-6">
@@ -95,16 +122,80 @@ const BookDetails = () => {
             <p className="text-gray-600">{book.rating}/5</p>
           </div>
 
+          {/* Borrow Button */}
           <div className="mt-6">
-            <Link
-              to="/all-books"
-              className="text-white bg-blue-600 px-6 py-2 rounded-lg hover:bg-blue-700"
+            <button
+              onClick={() => setShowModal(true)} // Open modal
+              className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700"
             >
-              Back to All Books
-            </Link>
+              Borrow
+            </button>
           </div>
         </div>
       </div>
+
+      {/* Borrow Modal */}
+      {showModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h2 className="text-2xl font-bold mb-4">Borrow Book</h2>
+            <form onSubmit={handleBorrow}>
+              <div className="mb-4">
+                <label className="block text-gray-700 font-bold mb-2">
+                  Name
+                </label>
+                <input
+                  type="text"
+                  value={user?.displayName}
+                  readOnly
+                  className="w-full px-4 py-2 border rounded-lg bg-gray-100"
+                />
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-gray-700 font-bold mb-2">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  value={user?.email}
+                  readOnly
+                  className="w-full px-4 py-2 border rounded-lg bg-gray-100"
+                />
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-gray-700 font-bold mb-2">
+                  Return Date
+                </label>
+                <input
+                  type="date"
+                  value={returnDate}
+                  onChange={(e) => setReturnDate(e.target.value)}
+                  required
+                  className="w-full px-4 py-2 border rounded-lg"
+                />
+              </div>
+
+              <div className="flex justify-end gap-4">
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)} // Close modal
+                  className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                >
+                  Borrow
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

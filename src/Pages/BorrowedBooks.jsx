@@ -1,41 +1,21 @@
-import React, { useState } from "react";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
 
 const BorrowedBooks = () => {
   // Sample borrowed books data for the logged-in user
-  const [borrowedBooks, setBorrowedBooks] = useState([
-    {
-      id: 1,
-      title: "The Great Gatsby",
-      category: "Novel",
-      borrowedDate: "2024-12-01",
-      returnDate: "2024-12-15",
-      image: "/path/to/book1.jpg",
-    },
-    {
-      id: 2,
-      title: "1984",
-      category: "Sci-Fi",
-      borrowedDate: "2024-12-05",
-      returnDate: "2024-12-20",
-      image: "/path/to/book2.jpg",
-    },
-    {
-      id: 3,
-      title: "To Kill a Mockingbird",
-      category: "Drama",
-      borrowedDate: "2024-12-10",
-      returnDate: "2024-12-25",
-      image: "/path/to/book3.jpg",
-    },
-  ]);
+  const [borrowedBooks, setBorrowedBooks] = useState([]);
 
+  useEffect(()=>{
+    const fetchData = async()=>{
+      const getDATA = await axios.get("http://localhost:5000/borrowed");
+      setBorrowedBooks(getDATA.data)
+    }
+    fetchData()
+  },[])
+  
   // Function to handle the return of a book
   const handleReturnBook = (bookId) => {
-    // Simulate removing the book from the borrowed books list
-    setBorrowedBooks(borrowedBooks.filter((book) => book.id !== bookId));
 
-    // You can add more logic here to update the database, e.g., increasing the quantity of the book
-    console.log(`Book with ID: ${bookId} has been returned.`);
   };
 
   return (
@@ -56,7 +36,9 @@ const BorrowedBooks = () => {
               />
               <h3 className="text-xl font-semibold">{book.title}</h3>
               <p className="text-gray-600">Category: {book.category}</p>
-              <p className="text-gray-600">Borrowed Date: {book.borrowedDate}</p>
+              <p className="text-gray-600">
+                Borrowed Date: {book.borrowedDate}
+              </p>
               <p className="text-gray-600">Return Date: {book.returnDate}</p>
               <div className="mt-4">
                 <button

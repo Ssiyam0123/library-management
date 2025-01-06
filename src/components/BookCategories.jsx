@@ -10,12 +10,13 @@ const BookCategories = () => {
     const fetchCategories = async () => {
       try {
         const res = await axios.get("http://localhost:5000/books");
-        // Extract unique categories from the fetched books
+
         const uniqueCategories = [
           ...new Set(res.data.map((book) => book.category)),
         ].map((category) => ({
           name: category,
-          image: res.data.find((book) => book.category === category)?.coverImage,
+          image: res.data.find((book) => book.category === category)
+            ?.coverImage,
         }));
         setCategories(uniqueCategories);
       } catch (error) {
