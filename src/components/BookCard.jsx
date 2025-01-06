@@ -1,28 +1,49 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React from "react";
+import { Link } from "react-router-dom";
+import ReactStars from "react-stars";
 
-const BookCard = ({book}) => {
-    return (
-        <div
-            key={book._id}
-            className="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-xl transition-shadow duration-300"
-          >
-            <img src={book.coverImage} className="w-full h-48 object-cover" />
-            <div className="p-4">
-              <h3 className="text-xl font-semibold text-blue-600">
-                {book.title}
-              </h3>
-              <p className="text-gray-700 text-sm">{book.authorName}</p>
-              <p className="text-gray-600 text-sm mt-2">{book.description}</p>
-              <Link
-                to={`/book/${book._id}`}
-                className="mt-4 text-blue-500 hover:text-blue-700"
-              >
-                View Details
-              </Link>
-            </div>
-          </div>
-    );
+const BookCard = ({ book }) => {
+  return (
+    <div
+      key={book._id}
+      className="bg-white p-4 shadow-md rounded-lg overflow-hidden"
+    >
+      {/* Book Cover Image */}
+      <img
+        src={book.coverImage}
+        alt={book.title}
+        className="h-40 w-full object-cover rounded-lg mb-4"
+      />
+
+      {/* Book Details */}
+      <h3 className="text-lg font-bold">{book.title}</h3>
+      <p className="text-gray-600">Author: {book.authorName}</p>
+      <p className="text-gray-600">Category: {book.category}</p>
+      <div className="flex items-center mt-2">
+        <ReactStars
+          count={5} // Maximum stars
+          value={book.rating || 0} // Rating value from book
+          size={20} // Size of stars
+          isHalf={true} // Allow half-stars
+          edit={false} // Make stars read-only
+          activeColor="#ffd700" // Gold color
+        />
+        <span className="ml-2 text-sm text-gray-500">
+          {book.rating || "N/A"}
+        </span>
+      </div>
+
+      {/* Update Button */}
+      <div className="mt-4">
+        <button
+          onClick={() => navigate(`/update-book/${book._id}`)} // Navigate to update page
+          className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition"
+        >
+          Update
+        </button>
+      </div>
+    </div>
+  );
 };
 
 export default BookCard;
