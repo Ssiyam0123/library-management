@@ -33,6 +33,7 @@ const AddBooks = () => {
       coverImage,
       addedBy,
     };
+    console.log(newBook)
 
     try {
       // Post data to the server

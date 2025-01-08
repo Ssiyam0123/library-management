@@ -1,18 +1,17 @@
 import axios from "axios";
 import React, { useState, useEffect, useContext } from "react";
 import { useParams, Link } from "react-router-dom";
-import AuthProvider, { AuthContext } from "../provider/AuthProvider";
+import { AuthContext } from "../provider/AuthProvider";
 import { toast } from "react-toastify";
 
 const BookDetails = () => {
-  const { id } = useParams(); // Get the book ID from the URL
+  const { id } = useParams();
   const [book, setBook] = useState(null);
-  const {user} = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showModal, setShowModal] = useState(false); // State to toggle modal
-  const [returnDate, setReturnDate] = useState(""); // Return date state
-
+  const [showModal, setShowModal] = useState(false);
+  const [returnDate, setReturnDate] = useState("");
 
   useEffect(() => {
     const fetchBookData = async () => {
@@ -33,18 +32,38 @@ const BookDetails = () => {
   const handleBorrow = async (e) => {
     e.preventDefault();
 
+    if (!book) {
+      console.error("Book data is not available");
+      toast.error("Failed to borrow the book. Book data is missing.");
+      return;
+    }
+
     const borrowData = {
       bookId: book._id,
       bookTitle: book.title,
+      image: book.coverImage,
       userName: user.displayName,
       userEmail: user.email,
       returnDate,
     };
 
     try {
-      await axios.post("http://localhost:5000/borrow", borrowData);
-      toast.success("Book borrowed successfully!");
-      setShowModal(false); // Close the modal
+      const response = await axios.post(
+        "http://localhost:5000/borrow",
+        borrowData
+      );
+
+      if (response.status === 200) {
+        const updatedBook = await axios.get(
+          `http://localhost:5000/book/${book._id}`
+        );
+        setBook(updatedBook.data);
+
+        toast.success("Book borrowed successfully!");
+        setShowModal(false); // Close the modal
+      } else {
+        toast.error("Failed to borrow the book. Please try again.");
+      }
     } catch (err) {
       console.error("Error borrowing the book:", err);
       toast.error("Failed to borrow the book. Please try again.");
@@ -125,10 +144,15 @@ const BookDetails = () => {
           {/* Borrow Button */}
           <div className="mt-6">
             <button
-              onClick={() => setShowModal(true)} // Open modal
-              className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700"
+              onClick={() => setShowModal(true)}
+              disabled={book.quantity <= 0}
+              className={`px-6 py-2 rounded-lg text-white ${
+                book.quantity > 0
+                  ? "bg-green-600 hover:bg-green-700"
+                  : "bg-gray-400 cursor-not-allowed"
+              }`}
             >
-              Borrow
+              {book.quantity > 0 ? "Borrow" : "Out of Stock"}
             </button>
           </div>
         </div>

@@ -13,6 +13,7 @@ import Register from "./Pages/Register.jsx";
 import BookDetails from "./Pages/BookDetails.jsx";
 import AuthProvider from "./provider/AuthProvider.jsx";
 import CategoryBy from "./Pages/CategoryBy.jsx";
+import UpdateBookPage from "./Pages/UpdateBookPage.jsx";
 
 const router = createBrowserRouter([
   {
@@ -51,6 +52,10 @@ const router = createBrowserRouter([
         path: "/categories/:category",
         element:<CategoryBy/>,
         loader: ({params})=> fetch(`http://localhost:5000/categories/${params.category}`)
+      },
+      {
+        path: "/update-book/:id",
+        element: <UpdateBookPage/>
       }
     ],
   },

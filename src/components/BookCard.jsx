@@ -1,10 +1,11 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import ReactStars from "react-stars";
 
 const BookCard = ({ book }) => {
 
-    
+    const navigate = useNavigate()
+
   return (
     <div
       key={book._id}
